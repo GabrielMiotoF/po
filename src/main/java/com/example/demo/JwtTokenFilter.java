@@ -22,15 +22,28 @@ public class JwtTokenFilter extends GenericFilterBean {
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        String token = getTokenFromRequest((HttpServletRequest) request);
+        HttpServletRequest httpRequest = (HttpServletRequest) request;
+
+        System.out.println("Request URI: " + httpRequest.getRequestURI());
+
+        if (httpRequest.getRequestURI().equals("/auth/login") || httpRequest.getRequestURI().equals("/users/register")) {
+            chain.doFilter(request, response);
+            return;
+        }
+
+        String token = getTokenFromRequest(httpRequest);
 
         if (token != null && jwtTokenProvider.validateToken(token)) {
             String username = jwtTokenProvider.getUsernameFromToken(token);
+            System.out.println("Token validado para o usuário: " + username);
 
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                     username, null, new ArrayList<>()
             );
             SecurityContextHolder.getContext().setAuthentication(authentication);
+        } else {
+            System.out.println("Token inválido ou ausente.");
+
         }
 
         chain.doFilter(request, response);

@@ -46,7 +46,7 @@ public class TaskService {
 
     public Map<String, List<Tarefa>> getTasksByColumn() {
         return taskRepository.findAll().stream()
-                .sorted((t1, t2) -> t1.getPriority().compareTo(t2.getPriority())) // Ordena por prioridade
+                .sorted((t1, t2) -> t1.getPriority().compareTo(t2.getPriority()))
                 .collect(Collectors.groupingBy(Tarefa::getStatus));
     }
 

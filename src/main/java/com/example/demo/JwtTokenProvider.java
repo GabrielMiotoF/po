@@ -15,15 +15,17 @@ public class JwtTokenProvider {
     private String secretKey = "secret"; // Use um segredo forte para produção
     private long validityInMilliseconds = 3600000; // 1 hora
 
+    // Gera o token JWT
     public String generateToken(User user) {
         return Jwts.builder()
-                .setSubject(user.getUsername())
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + validityInMilliseconds))
-                .signWith(SignatureAlgorithm.HS256, secretKey)
+                .setSubject(user.getUsername())  // Define o nome do usuário como sujeito
+                .setIssuedAt(new Date())         // Define a data de emissão
+                .setExpiration(new Date(System.currentTimeMillis() + validityInMilliseconds)) // Define a data de expiração
+                .signWith(SignatureAlgorithm.HS256, secretKey) // Assina o token com a chave secreta
                 .compact();
     }
 
+    // Obtém o nome de usuário a partir do token
     public String getUsernameFromToken(String token) {
         return Jwts.parser()
                 .setSigningKey(secretKey)
@@ -31,21 +33,23 @@ public class JwtTokenProvider {
                 .getBody()
                 .getSubject();
     }
+
+    // Valida o token JWT
     public boolean validateToken(String token) {
         try {
-            // Valida a assinatura do token e extrai as claims
+            // Analisa o token e verifica sua assinatura
             Claims claims = Jwts.parser()
-                    .setSigningKey("secreta-chave-de-exemplo") // Substitua pela sua chave secreta
+                    .setSigningKey(secretKey)
                     .parseClaimsJws(token)
                     .getBody();
 
             // Verifica se o token expirou
             Date expiration = claims.getExpiration();
             if (expiration != null && expiration.before(new Date())) {
-                return false;
+                return false;  // Se o token expirou, ele é inválido
             }
 
-            return true; // Token é válido
+            return true;  // O token é válido
         } catch (SignatureException e) {
             // Assinatura inválida
             System.out.println("Token com assinatura inválida: " + e.getMessage());
